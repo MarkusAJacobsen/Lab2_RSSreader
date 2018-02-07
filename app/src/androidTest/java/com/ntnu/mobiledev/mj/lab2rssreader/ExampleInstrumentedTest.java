@@ -1,4 +1,4 @@
-package com.ntnu.mobiledev.mj.lab2_rssreader;
+package com.ntnu.mobiledev.mj.lab2rssreader;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

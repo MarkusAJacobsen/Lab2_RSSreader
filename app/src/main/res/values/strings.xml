@@ -1,3 +1,20 @@
 <resources>
     <string name="app_name">lab2_RSSreader</string>
+    <string name="preferences">Preferences</string>
+    <string name="saveButton">Save</string>
+    <string name="discardButton">Discard</string>
+    <string name="urlToolTip">Enter RSS URL</string>
+    <string name="itemsPrFeed">Feed item limit</string>
+    <string name="refreshInterval">Refresh interval</string>
+
+    <array name="itemsFeed">
+        <item>10</item>
+        <item>20</item>
+    </array>
+    <array name="refreshInterval">
+        <item>15 min</item>
+        <item>30 min</item>
+        <item>1 hour</item>
+    </array>
+
 </resources>
