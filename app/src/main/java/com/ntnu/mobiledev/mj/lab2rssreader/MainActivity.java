@@ -89,13 +89,11 @@ public class MainActivity extends AppCompatActivity {
             saxParser = factory.newSAXParser();
             saxParser.parse(inputSource, handler);
             feedItems = handler.getRssItems();
-            mListView.setAdapter(new ArrayAdapter<>(this, feedItems.size(), feedItems));
+            mListView.setAdapter(new ArrayAdapter<>(this, R.layout.list_item, feedItems));
         } catch (ParserConfigurationException | IOException | SAXException e) {
             e.printStackTrace();
         }
-
-        // The result of the parsing process is being stored in the handler object
-
+        
     }
 
     public void preferences(){

@@ -9,7 +9,7 @@ public class FeedItem {
     String description;
     String link;
     String author;
-    String guid;
+    String pubDate;
 
     public String getAuthor() {
         return author;
@@ -23,28 +23,28 @@ public class FeedItem {
         return title;
     }
 
-    public String getGuid() {
-        return guid;
-    }
-
     public String getLink() {
         return link;
+    }
+
+    public String getPubDate() {
+        return pubDate;
     }
 
     public void setAuthor(String author) {
         this.author = author;
     }
 
-    public void setDescription(String description) {
+    void setDescription(String description) {
         this.description = description;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    void setLink(String link) {
+        this.link = link;
     }
 
-    public void setLink(String link) {
-        this.link = link;
+    void setPubDate(String pubDate) {
+        this.pubDate = pubDate;
     }
 
     public void setTitle(String title) {
@@ -53,9 +53,8 @@ public class FeedItem {
 
     @Override
     public String toString(){
-        return "FeedMessage [title=" + title + ", description=" + description
-                + ", link=" + link + ", author=" + author + ", guid=" + guid
-                + "]";
+        return title + "\nDescription=" + description
+                + "\nLink=" + link + "\nAuthor=" + author + " Pub: " + pubDate;
     }
 }
 

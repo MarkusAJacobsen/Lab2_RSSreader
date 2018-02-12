@@ -26,6 +26,9 @@ public class RSSHandler extends DefaultHandler {
 
     private boolean parsingTitle;
     private boolean parsingLink;
+    private boolean parsingDescription;
+    private boolean parsingPub;
+    private boolean parsingAuthor;
 
 
 
@@ -38,6 +41,12 @@ public class RSSHandler extends DefaultHandler {
             parsingTitle = true;
         } else if ("link".equals(qName)) {
             parsingLink = true;
+        } else if ("description".equals(qName)){
+            parsingDescription = true;
+        } else if ("pubDate".equals(qName)) {
+            parsingPub = true;
+        } else if ("author".equals(qName)) {
+            parsingAuthor = true;
         }
     }
     // The EndElement method adds the  current RssItem to the list when a closing item tag is processed. It sets appropriate indicators to false -  when title and link closing tags are processed
@@ -50,6 +59,12 @@ public class RSSHandler extends DefaultHandler {
             parsingTitle = false;
         } else if ("link".equals(qName)) {
             parsingLink = false;
+        } else if ("description".equals(qName)) {
+            parsingDescription = false;
+        } else if ("pubDate".equals(qName)) {
+            parsingPub = false;
+        } else if ("author".equals(qName)) {
+            parsingAuthor = false;
         }
     }
     // Characters method fills current RssItem object with data when title and link tag content is being processed
@@ -62,6 +77,21 @@ public class RSSHandler extends DefaultHandler {
             if (currentItem != null) {
                 currentItem.setLink(new String(ch, start, length));
                 parsingLink = false;
+            }
+        } else if (parsingDescription) {
+            if(currentItem != null) {
+                currentItem.setDescription(new String(ch, start, length));
+                parsingDescription = false;
+            }
+        } else if (parsingPub) {
+            if(currentItem != null) {
+                currentItem.setPubDate(new String(ch, start, length));
+                parsingPub = false;
+            }
+        } else if (parsingAuthor) {
+            if(currentItem != null) {
+                currentItem.setAuthor(new String(ch, start, length));
+                parsingAuthor = false;
             }
         }
     }
