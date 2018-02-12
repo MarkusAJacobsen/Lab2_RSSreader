@@ -7,14 +7,15 @@
     <string name="itemsPrFeed">Feed item limit</string>
     <string name="refreshInterval">Refresh interval</string>
 
-    <array name="itemsFeed">
-        <item>10</item>
-        <item>20</item>
-    </array>
-    <array name="refreshInterval">
-        <item>15 min</item>
-        <item>30 min</item>
-        <item>1 hour</item>
-    </array>
+    <string-array name="itemsFeed">
+        <item>10 in feed</item>
+        <item>20 in feed</item>
+        <item>30 in feed</item>
+    </string-array>
+    <string-array name="refreshInterval">
+        <item>Update every 15 min</item>
+        <item>Update every 30 min</item>
+        <item>Update every 1 hour</item>
+    </string-array>
 
 </resources>
