@@ -1,22 +1,35 @@
 package com.ntnu.mobiledev.mj.lab2rssreader;
 
-import android.content.Context;
+import android.app.PendingIntent;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.util.Objects;
+import java.io.StringReader;
+import java.util.List;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 import okhttp3.HttpUrl;
 
 public class MainActivity extends AppCompatActivity {
+    private static final int RSS_DOWNLOAD_REQUEST_CODE = 0;
     private ActionBar mActionBar;
+    private ListView mListView;
+
     private HttpUrl url;
+    private List<FeedItem> feedItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
         mActionBar.setHomeButtonEnabled(true);
         mActionBar.setDisplayHomeAsUpEnabled(true);
 
+        mListView = findViewById(R.id.listViewFeed);
+
         try {
             fetchUpdate();
         } catch(IOException e){
@@ -36,6 +51,16 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == RSS_DOWNLOAD_REQUEST_CODE) {
+            handleRSS(data.getStringExtra(RSSReader.INPUTSOURCE_EXTRA));
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -55,13 +80,34 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void handleRSS(String data) {
+        final InputSource inputSource = new InputSource(new StringReader(data));
+        RSSHandler handler = new RSSHandler();
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        SAXParser saxParser = null;
+        try {
+            saxParser = factory.newSAXParser();
+            saxParser.parse(inputSource, handler);
+            feedItems = handler.getRssItems();
+            mListView.setAdapter(new ArrayAdapter<>(this, feedItems.size(), feedItems));
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            e.printStackTrace();
+        }
+
+        // The result of the parsing process is being stored in the handler object
+
+    }
+
     public void preferences(){
         Intent intent = new Intent(MainActivity.this, PreferencesActivity.class);
         startActivity(intent);
     }
 
     void fetchUpdate() throws IOException{
-       Intent RSSreader = new Intent(getApplicationContext(), RSSReader.class);
-       startService(RSSreader);
+        PendingIntent pendingResult = createPendingResult(
+                RSS_DOWNLOAD_REQUEST_CODE, new Intent(), 0);
+       Intent rssReader = new Intent(getApplicationContext(), RSSReader.class);
+       rssReader.putExtra(RSSReader.PENDING_RESULT_EXTRA, pendingResult);
+       startService(rssReader);
     }
 }
