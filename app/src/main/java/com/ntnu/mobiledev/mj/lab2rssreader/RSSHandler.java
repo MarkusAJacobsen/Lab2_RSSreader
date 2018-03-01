@@ -14,13 +14,16 @@ import java.util.List;
 
 public class RSSHandler extends DefaultHandler {
     private List<FeedItem> rssItems;
+    private int limit;
     private FeedItem currentItem;
 
-    RSSHandler(){
+    RSSHandler(int limit){
         rssItems = new ArrayList();
+        this.limit = limit;
     }
 
     List<FeedItem> getRssItems(){
+        rssItems = rssItems.subList(0, limit);
         return this.rssItems;
     }
 
@@ -28,7 +31,6 @@ public class RSSHandler extends DefaultHandler {
     private boolean parsingLink;
     private boolean parsingDescription;
     private boolean parsingPub;
-    private boolean parsingAuthor;
 
 
 
@@ -45,8 +47,6 @@ public class RSSHandler extends DefaultHandler {
             parsingDescription = true;
         } else if ("pubDate".equals(qName)) {
             parsingPub = true;
-        } else if ("author".equals(qName)) {
-            parsingAuthor = true;
         }
     }
     // The EndElement method adds the  current RssItem to the list when a closing item tag is processed. It sets appropriate indicators to false -  when title and link closing tags are processed
@@ -63,8 +63,6 @@ public class RSSHandler extends DefaultHandler {
             parsingDescription = false;
         } else if ("pubDate".equals(qName)) {
             parsingPub = false;
-        } else if ("author".equals(qName)) {
-            parsingAuthor = false;
         }
     }
     // Characters method fills current RssItem object with data when title and link tag content is being processed
@@ -87,11 +85,6 @@ public class RSSHandler extends DefaultHandler {
             if(currentItem != null) {
                 currentItem.setPubDate(new String(ch, start, length));
                 parsingPub = false;
-            }
-        } else if (parsingAuthor) {
-            if(currentItem != null) {
-                currentItem.setAuthor(new String(ch, start, length));
-                parsingAuthor = false;
             }
         }
     }

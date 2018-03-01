@@ -1,5 +1,7 @@
 package com.ntnu.mobiledev.mj.lab2rssreader;
 
+import android.util.Log;
+
 /**
  * Created by markusja on 2/12/18.
  */
@@ -8,12 +10,8 @@ public class FeedItem {
     String title;
     String description;
     String link;
-    String author;
     String pubDate;
 
-    public String getAuthor() {
-        return author;
-    }
 
     public String getDescription() {
         return description;
@@ -31,9 +29,6 @@ public class FeedItem {
         return pubDate;
     }
 
-    public void setAuthor(String author) {
-        this.author = author;
-    }
 
     void setDescription(String description) {
         this.description = description;
@@ -54,7 +49,7 @@ public class FeedItem {
     @Override
     public String toString(){
         return title + "\nDescription=" + description
-                + "\nLink=" + link + "\nAuthor=" + author + " Pub: " + pubDate;
+                + "\nPub: " + pubDate;
     }
 }
 

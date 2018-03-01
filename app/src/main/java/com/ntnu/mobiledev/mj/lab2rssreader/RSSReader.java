@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-
 import java.io.IOException;
 import java.util.Objects;
 
@@ -57,7 +56,6 @@ public class RSSReader extends IntentService{
             final Response response = client.newCall(request).execute();
             final String body = response.body().string();
             int responseCode = response.code();
-
             if (responseCode == 200) {
                 if (body != null) {
                     Intent result = new Intent();

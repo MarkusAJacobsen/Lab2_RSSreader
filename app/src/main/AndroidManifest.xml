@@ -18,8 +18,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PreferencesActivity">
-        </activity>
+        <activity android:name=".PreferencesActivity"/>
+        <activity android:name=".WebActivity"/>
         <service android:name=".RSSReader" android:exported="false"/>
     </application>
 

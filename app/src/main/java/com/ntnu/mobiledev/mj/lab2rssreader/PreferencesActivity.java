@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by markusja on 2/7/18.
@@ -34,10 +36,11 @@ public class PreferencesActivity extends AppCompatActivity {
     private Spinner mRefresh;
 
     private String url;
-    private String feed;
+    private int feed;
     private String refresh;
 
     public static final String PREFS_NAME = "PrefsFile";
+    public static final String PREFS_LIMIT = "Feed";
     SharedPreferences preferences;
 
     @Override
@@ -54,7 +57,7 @@ public class PreferencesActivity extends AppCompatActivity {
         // Restore preferences
         preferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         url = preferences.getString("URL", "");
-        feed = preferences.getString("Feed", "");
+        feed = preferences.getInt("Feed", 10);
         refresh = preferences.getString("Refresh", "");
 
         if(!Objects.equals(url, "")) {
@@ -71,9 +74,11 @@ public class PreferencesActivity extends AppCompatActivity {
                     mUrl.setError("Malformed URL");
                 }
 
+
+
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putString("URL", mUrl.getEditableText().toString());
-                editor.putString("Feed", mFeed.getSelectedItem().toString());
+                editor.putInt("Feed", parseInteger(mFeed.getSelectedItem().toString()));
                 editor.putString("Refresh", mRefresh.getSelectedItem().toString());
                 editor.apply();
 
@@ -90,7 +95,7 @@ public class PreferencesActivity extends AppCompatActivity {
             }
         });
 
-        populateSpinner(feed, mFeed, R.array.itemsFeed);
+        populateSpinner(String.valueOf(feed), mFeed, R.array.itemsFeed);
         populateSpinner(refresh, mRefresh, R.array.refreshInterval);
     }
 
@@ -110,5 +115,13 @@ public class PreferencesActivity extends AppCompatActivity {
         } else {
             spinner.setSelection(0);
         }
+    }
+
+    int parseInteger(String s){
+        Pattern intsOnly = Pattern.compile("([+-]?\\d+)([eE][+-]?\\d+)?");
+        Matcher makeMatch = intsOnly.matcher(s);
+        makeMatch.find();
+        String inputInt = makeMatch.group();
+        return Integer.parseInt(inputInt);
     }
 }
