@@ -28,6 +28,9 @@ import java.util.regex.Pattern;
  * Created by markusja on 2/7/18.
  */
 
+/**
+ * Preference activity controller
+ */
 public class PreferencesActivity extends AppCompatActivity {
     private Button mSave;
     private Button mDiscard;
@@ -37,12 +40,21 @@ public class PreferencesActivity extends AppCompatActivity {
 
     private String url;
     private int feed;
-    private String refresh;
+    private int refresh;
 
+    /**
+     * Preference statics, used in other classes.
+     */
     public static final String PREFS_NAME = "PrefsFile";
     public static final String PREFS_LIMIT = "Feed";
+    public static final String PREFS_REFRESH = "Refresh";
+    public static final String DEFAULT_URL = "https://www.usa.gov/rss/updates.xml";
     SharedPreferences preferences;
 
+    /**
+     * Called when the activity is created
+     * @param savedInstanceState Bundle
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,9 +68,9 @@ public class PreferencesActivity extends AppCompatActivity {
 
         // Restore preferences
         preferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        url = preferences.getString("URL", "");
-        feed = preferences.getInt("Feed", 10);
-        refresh = preferences.getString("Refresh", "");
+        url = preferences.getString("URL", DEFAULT_URL);
+        feed = preferences.getInt(PREFS_LIMIT, 10);
+        refresh = preferences.getInt(PREFS_REFRESH, 15);
 
         if(!Objects.equals(url, "")) {
             mUrl.setText(url);
@@ -78,8 +90,8 @@ public class PreferencesActivity extends AppCompatActivity {
 
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putString("URL", mUrl.getEditableText().toString());
-                editor.putInt("Feed", parseInteger(mFeed.getSelectedItem().toString()));
-                editor.putString("Refresh", mRefresh.getSelectedItem().toString());
+                editor.putInt(PREFS_LIMIT, parseInteger(mFeed.getSelectedItem().toString()));
+                editor.putInt(PREFS_REFRESH, parseInteger(mRefresh.getSelectedItem().toString()));
                 editor.apply();
 
                 final Intent intent = new Intent(PreferencesActivity.this, MainActivity.class);
@@ -95,10 +107,22 @@ public class PreferencesActivity extends AppCompatActivity {
             }
         });
 
-        populateSpinner(String.valueOf(feed), mFeed, R.array.itemsFeed);
-        populateSpinner(refresh, mRefresh, R.array.refreshInterval);
+        populateSpinner(String.valueOf(feed)+" in feed", mFeed, R.array.itemsFeed);
+
+        String postfix = " min";
+        if(refresh == 60) {
+            refresh = 1;
+            postfix = " hour";
+        }
+        populateSpinner(String.format("Update every %s%s", String.valueOf(refresh), postfix), mRefresh, R.array.refreshInterval);
     }
 
+    /**
+     * Populate a spinner widget
+     * @param selected String
+     * @param spinner Spinner
+     * @param resourceArray int
+     */
     void populateSpinner(String selected, Spinner spinner, int resourceArray){
         List<String> list = new ArrayList<>();
         final String[] items = getResources().getStringArray(resourceArray);
@@ -117,11 +141,22 @@ public class PreferencesActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Since the spinners contain a combination of numbers and string, get only the int from regex
+     * @param s String
+     * @return int
+     */
     int parseInteger(String s){
-        Pattern intsOnly = Pattern.compile("([+-]?\\d+)([eE][+-]?\\d+)?");
+        final Pattern intsOnly = Pattern.compile("([+-]?\\d+)([eE][+-]?\\d+)?");
         Matcher makeMatch = intsOnly.matcher(s);
         makeMatch.find();
-        String inputInt = makeMatch.group();
-        return Integer.parseInt(inputInt);
+        final String inputInt = makeMatch.group();
+        final int number = Integer.parseInt(inputInt);
+        if(number == 1) {
+            return Integer.parseInt(inputInt)*60;
+        } else {
+            return Integer.parseInt(inputInt);
+        }
+
     }
 }

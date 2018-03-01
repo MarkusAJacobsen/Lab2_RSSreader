@@ -6,11 +6,14 @@ import android.util.Log;
  * Created by markusja on 2/12/18.
  */
 
+/**
+ * Representing a single item in a ListView
+ */
 public class FeedItem {
-    String title;
-    String description;
-    String link;
-    String pubDate;
+    private String title;
+    private String description;
+    private String link;
+    private String pubDate;
 
 
     public String getDescription() {
@@ -46,6 +49,10 @@ public class FeedItem {
         this.title = title;
     }
 
+    /**
+     * Ensures correct formatting of this object to put into a TextView
+     * @return String
+     */
     @Override
     public String toString(){
         return title + "\nDescription=" + description

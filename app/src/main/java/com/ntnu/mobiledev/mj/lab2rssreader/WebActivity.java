@@ -15,6 +15,7 @@ public class WebActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.web_view);
         Intent intent = getIntent();
         final String url = intent.getStringExtra("url");
         mWebView = findViewById(R.id.browser);

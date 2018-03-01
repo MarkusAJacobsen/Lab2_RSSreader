@@ -12,18 +12,31 @@ import java.util.List;
  * Created by markusja on 2/12/18.
  */
 
+/**
+ * Custom handler for the SAXParser. Parses a RSS item with the correct required params
+ * https://cyber.harvard.edu/rss/rss.html
+ */
 public class RSSHandler extends DefaultHandler {
     private List<FeedItem> rssItems;
     private int limit;
     private FeedItem currentItem;
 
+    /**
+     * Constructor
+     * @param limit int - number of items to return
+     */
     RSSHandler(int limit){
         rssItems = new ArrayList();
         this.limit = limit;
     }
 
+    /**
+     * Getter for rssItems
+     * @return List<FeedItem>
+     */
     List<FeedItem> getRssItems(){
-        rssItems = rssItems.subList(0, limit);
+        final int localLimit = rssItems.size() < limit ? rssItems.size() : limit;
+        rssItems = rssItems.subList(0, localLimit);
         return this.rssItems;
     }
 
@@ -34,7 +47,11 @@ public class RSSHandler extends DefaultHandler {
 
 
 
-    // The StartElement method creates an empty RssItem object when an item start tag is being processed. When a title or link tag are being processed appropriate indicators are set to true.
+    /**
+     * The StartElement method creates an empty RssItem object when an item start tag is
+     * being processed. When a title or link tag are being processed appropriate
+     * indicators are set to true.
+     */
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         if ("item".equals(qName)) {
@@ -49,7 +66,12 @@ public class RSSHandler extends DefaultHandler {
             parsingPub = true;
         }
     }
-    // The EndElement method adds the  current RssItem to the list when a closing item tag is processed. It sets appropriate indicators to false -  when title and link closing tags are processed
+
+    /**
+     * The EndElement method adds the  current RssItem to the list when a closing
+     * item tag is processed. It sets appropriate indicators to false -
+     * when title and link closing tags are processed
+     */
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if ("item".equals(qName)) {
@@ -65,7 +87,10 @@ public class RSSHandler extends DefaultHandler {
             parsingPub = false;
         }
     }
-    // Characters method fills current RssItem object with data when title and link tag content is being processed
+    /**
+     * Characters method fills current RssItem object with data when title and link tag
+     * content is being processed
+     */
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
         if (parsingTitle) {

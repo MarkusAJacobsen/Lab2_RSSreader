@@ -21,10 +21,16 @@ import okhttp3.Response;
  * Created by markusja on 2/8/18.
  */
 
+/**
+ * RSSReader will fetch data from a URL
+ */
 public class RSSReader extends IntentService{
     private static final String PREFS_NAME = "PrefsFile";
     private static final String TAG = RSSReader.class.getSimpleName();
 
+    /**
+     * Intent statics
+     */
     public static final String PENDING_RESULT_EXTRA = "pending_result";
     public static final String INPUTSOURCE_EXTRA = "input_source_byteChar";
     public static final int INPUTSOURCE_CODE = 0;
@@ -32,11 +38,18 @@ public class RSSReader extends IntentService{
 
     OkHttpClient client;
 
+    /**
+     * Constructor
+     */
     RSSReader() {
         super(TAG);
         client = new OkHttpClient();
     }
 
+    /**
+     * When a IntentService is called, onHandleIntent() is the function processing everything
+     * @param intent Intent
+     */
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         final HttpUrl url = buildURLFromPreference();
@@ -45,7 +58,6 @@ public class RSSReader extends IntentService{
         }
 
         PendingIntent reply = intent.getParcelableExtra(PENDING_RESULT_EXTRA);
-        verifyCertificate();
 
         final Request request = new Request.Builder()
                 .get()
@@ -71,18 +83,18 @@ public class RSSReader extends IntentService{
         }
     }
 
+    /**
+     * Builds a HttpUrl object from preferences
+     * @return HttpUrl
+     */
     HttpUrl buildURLFromPreference(){
         SharedPreferences preferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        final String urlFromPreference = preferences.getString("URL", "");
+        final String urlFromPreference = preferences.getString("URL", PreferencesActivity.DEFAULT_URL);
 
         if(Objects.equals(urlFromPreference, "")){
             return null;
         } else {
             return HttpUrl.parse(urlFromPreference);
         }
-    }
-
-    boolean verifyCertificate(){
-        return false;
     }
 }

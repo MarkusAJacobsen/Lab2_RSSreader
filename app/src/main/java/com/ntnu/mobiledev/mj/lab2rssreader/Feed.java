@@ -7,16 +7,28 @@ import java.util.List;
  * Created by markusja on 2/12/18.
  */
 
+/**
+ * The RSS feed consisting of feedItems
+ */
 public class Feed {
-    final String title;
-    final String link;
-    final String description;
-    final String language;
-    final String copyright;
-    final String pubDate;
+    private final String title;
+    private final String link;
+    private final String description;
+    private final String language;
+    private final String copyright;
+    private final String pubDate;
 
-    final List<FeedItem> entries = new ArrayList<FeedItem>();
+    private final List<FeedItem> entries = new ArrayList<FeedItem>();
 
+    /**
+     * Constructor
+     * @param title String
+     * @param link String
+     * @param description String
+     * @param language String
+     * @param copyright String
+     * @param pubDate String
+     */
     public Feed(String title, String link, String description, String language,
                 String copyright, String pubDate) {
         this.title = title;
@@ -55,6 +67,10 @@ public class Feed {
         return pubDate;
     }
 
+    /**
+     * Override toString to return correct formatting for a list item
+     * @return String
+     */
     @Override
     public String toString() {
         return "Feed [copyright=" + copyright + ", description=" + description
