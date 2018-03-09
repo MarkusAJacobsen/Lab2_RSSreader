@@ -3,6 +3,7 @@ package com.ntnu.mobiledev.mj.lab2rssreader;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 /**
@@ -20,6 +21,14 @@ public class WebActivity extends AppCompatActivity {
         final String url = intent.getStringExtra("url");
         mWebView = findViewById(R.id.browser);
 
+        WebSettings settings = mWebView.getSettings();
+        settings.setJavaScriptEnabled(true);
+
         mWebView.loadUrl(url);
+    }
+
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(WebActivity.this, MainActivity.class));
     }
 }

@@ -1,9 +1,12 @@
 package com.ntnu.mobiledev.mj.lab2rssreader;
 
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -38,6 +41,7 @@ import okhttp3.HttpUrl;
  */
 public class MainActivity extends AppCompatActivity {
     private static final int RSS_DOWNLOAD_REQUEST_CODE = 0;
+    public static final int FAILURE = 1;
     private ActionBar mActionBar;
     private ListView mListView;
     private int limit;
@@ -46,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private List<FeedItem> feedItems;
     private Handler uiHandler;
     private boolean run = true;
+    private Timer timer;
 
     private static final int DEFAULT_LIMIT = 15;
     private static final int DEFAULT_REFRESH = 30;
@@ -92,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
      * counted down, trigger fetchUpdate()
      */
     private void createUpdater(){
-        Timer timer = new Timer();
+        timer = new Timer();
         TimerTask doAsynchronousTask = new TimerTask() {
             @Override
             public void run() {
@@ -107,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         };
-        timer.schedule(doAsynchronousTask, 0, refresh); //execute in every 10 minutes
+        timer.scheduleAtFixedRate(doAsynchronousTask, refresh, refresh); //execute in every 10 minutes
     }
 
     /**
@@ -120,6 +125,29 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == RSS_DOWNLOAD_REQUEST_CODE) {
             handleRSS(data.getStringExtra(RSSReader.INPUTSOURCE_EXTRA));
+        } else if (requestCode == FAILURE) {
+            AlertDialog.Builder builder1 = new AlertDialog.Builder(getApplicationContext());
+            builder1.setMessage("Write your message here.");
+            builder1.setCancelable(true);
+
+            builder1.setPositiveButton(
+                    "Yes",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+
+            builder1.setNegativeButton(
+                    "No",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+
+            AlertDialog alert11 = builder1.create();
+            alert11.show();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -183,6 +211,7 @@ public class MainActivity extends AppCompatActivity {
      */
     public void preferences(){
         Intent intent = new Intent(MainActivity.this, PreferencesActivity.class);
+        timer.cancel();
         startActivity(intent);
     }
 
@@ -208,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
             String url = feedItems.get(position).getLink();
             Intent intent = new Intent(MainActivity.this, WebActivity.class);
             intent.putExtra("url", url);
+            timer.cancel();
             startActivity(intent);
         }
     }

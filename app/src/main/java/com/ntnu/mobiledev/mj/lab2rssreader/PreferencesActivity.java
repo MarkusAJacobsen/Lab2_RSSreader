@@ -117,6 +117,11 @@ public class PreferencesActivity extends AppCompatActivity {
         populateSpinner(String.format("Update every %s%s", String.valueOf(refresh), postfix), mRefresh, R.array.refreshInterval);
     }
 
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(PreferencesActivity.this, MainActivity.class));
+    }
+
     /**
      * Populate a spinner widget
      * @param selected String

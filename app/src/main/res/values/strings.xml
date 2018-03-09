@@ -13,6 +13,7 @@
         <item>30 in feed</item>
     </string-array>
     <string-array name="refreshInterval">
+        <item>2</item>
         <item>Update every 15 min</item>
         <item>Update every 30 min</item>
         <item>Update every 1 hour</item>

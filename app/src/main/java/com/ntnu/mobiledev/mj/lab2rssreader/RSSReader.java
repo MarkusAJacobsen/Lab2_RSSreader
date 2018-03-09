@@ -76,7 +76,7 @@ public class RSSReader extends IntentService{
                 }
             } else {
                 Log.d("Http code", String.valueOf(responseCode));
-                reply.send(FAILURE);
+                reply.send(this, FAILURE, new Intent());
             }
         } catch (IOException | PendingIntent.CanceledException e) {
             e.printStackTrace();
