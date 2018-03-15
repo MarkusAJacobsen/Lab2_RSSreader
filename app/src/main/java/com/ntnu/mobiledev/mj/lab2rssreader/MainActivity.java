@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int DEFAULT_LIMIT = 15;
     private static final int DEFAULT_REFRESH = 30;
-    private static final int MINUTES_TO_MS_CONVERSION = 60000;
+    public static final int MINUTES_TO_MS_CONVERSION = 60000;
 
     /**
      * Called when the activity is launched.

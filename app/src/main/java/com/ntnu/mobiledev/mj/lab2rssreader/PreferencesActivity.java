@@ -158,9 +158,9 @@ public class PreferencesActivity extends AppCompatActivity {
         final String inputInt = makeMatch.group();
         final int number = Integer.parseInt(inputInt);
         if(number == 1) {
-            return Integer.parseInt(inputInt)*60;
+            return Integer.parseInt(inputInt)*60*MainActivity.MINUTES_TO_MS_CONVERSION;
         } else {
-            return Integer.parseInt(inputInt);
+            return Integer.parseInt(inputInt)*MainActivity.MINUTES_TO_MS_CONVERSION;
         }
 
     }
