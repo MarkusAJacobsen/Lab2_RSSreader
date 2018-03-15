@@ -19,6 +19,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -26,9 +28,12 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -44,13 +49,15 @@ public class MainActivity extends AppCompatActivity {
     public static final int FAILURE = 1;
     private ActionBar mActionBar;
     private ListView mListView;
+    private TextView debug;
     private int limit;
     private int refresh;
     private HttpUrl url;
     private List<FeedItem> feedItems;
     private Handler uiHandler;
-    private boolean run = true;
     private Timer timer;
+    private Executor es;
+    private ArrayAdapter adapter;
 
     private static final int DEFAULT_LIMIT = 15;
     private static final int DEFAULT_REFRESH = 30;
@@ -66,20 +73,30 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         uiHandler = new Handler();
-
         mActionBar = getSupportActionBar();
         mActionBar.setHomeButtonEnabled(true);
 
         mListView = findViewById(R.id.listViewFeed);
 
-        getDataFromPreferences();
-        createUpdater();
+        debug = findViewById(R.id.debug);
 
-        try {
-            fetchUpdate();
-        } catch(IOException e){
-            e.printStackTrace();
-        }
+        feedItems = new ArrayList<>();
+        adapter = new ArrayAdapter<>(this, R.layout.list_item, feedItems);
+
+        es = Executors.newFixedThreadPool(2);
+
+        es.execute(new Runnable() {
+            @Override
+            public void run() {
+                getDataFromPreferences();
+                createUpdater();
+                try {
+                    fetchUpdate();
+                } catch(IOException e){
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     /**
@@ -87,8 +104,8 @@ public class MainActivity extends AppCompatActivity {
      */
     private void getDataFromPreferences() {
         final SharedPreferences preferences = getSharedPreferences(PreferencesActivity.PREFS_NAME, Context.MODE_PRIVATE);
-        this.limit = preferences.getInt(PreferencesActivity.PREFS_LIMIT, DEFAULT_LIMIT);
-        this.refresh = preferences.getInt(PreferencesActivity.PREFS_REFRESH, DEFAULT_REFRESH);
+        MainActivity.this.limit = preferences.getInt(PreferencesActivity.PREFS_LIMIT, DEFAULT_LIMIT);
+        MainActivity.this.refresh = preferences.getInt(PreferencesActivity.PREFS_REFRESH, DEFAULT_REFRESH*MINUTES_TO_MS_CONVERSION);
     }
 
     /**
@@ -112,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         };
-        timer.scheduleAtFixedRate(doAsynchronousTask, refresh, refresh); //execute in every 10 minutes
+        timer.scheduleAtFixedRate(doAsynchronousTask, MainActivity.this.refresh, MainActivity.this.refresh); //execute in every 10 minutes
     }
 
     /**
@@ -126,28 +143,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == RSS_DOWNLOAD_REQUEST_CODE) {
             handleRSS(data.getStringExtra(RSSReader.INPUTSOURCE_EXTRA));
         } else if (requestCode == FAILURE) {
-            AlertDialog.Builder builder1 = new AlertDialog.Builder(getApplicationContext());
-            builder1.setMessage("Write your message here.");
-            builder1.setCancelable(true);
-
-            builder1.setPositiveButton(
-                    "Yes",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
-
-            builder1.setNegativeButton(
-                    "No",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
-
-            AlertDialog alert11 = builder1.create();
-            alert11.show();
+            Toast.makeText(getApplicationContext(), "Failed to fetch feed", Toast.LENGTH_SHORT).show();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -185,25 +181,35 @@ public class MainActivity extends AppCompatActivity {
      * from a HTTP response
      * @param data String
      */
-    private void handleRSS(String data) {
+    private void handleRSS(final String data) {
         if(data == null) {
             return;
         }
 
-        final InputSource inputSource = new InputSource(new StringReader(data));
-        RSSHandler handler = new RSSHandler(this.limit);
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        SAXParser saxParser = null;
-        try {
-            saxParser = factory.newSAXParser();
-            saxParser.parse(inputSource, handler);
-            feedItems = handler.getRssItems();
-            mListView.setAdapter(new ArrayAdapter<>(this, R.layout.list_item, feedItems));
-            mListView.setOnItemClickListener(new ItemClickListener());
-        } catch (ParserConfigurationException | IOException | SAXException e) {
-            e.printStackTrace();
-        }
-
+        es.execute(new Runnable() {
+            @Override
+            public void run() {
+                final InputSource inputSource = new InputSource(new StringReader(data));
+                final RSSHandler handler = new RSSHandler(limit);
+                SAXParserFactory factory = SAXParserFactory.newInstance();
+                SAXParser saxParser = null;
+                try {
+                    saxParser = factory.newSAXParser();
+                    saxParser.parse(inputSource, handler);
+                    MainActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            feedItems = handler.getRssItems();
+                            adapter = new ArrayAdapter<>(MainActivity.this, R.layout.list_item, feedItems);
+                            mListView.setAdapter(adapter);
+                            mListView.setOnItemClickListener(new ItemClickListener());
+                        }
+                    });
+                } catch (ParserConfigurationException | IOException | SAXException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     /**
@@ -211,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
      */
     public void preferences(){
         Intent intent = new Intent(MainActivity.this, PreferencesActivity.class);
-        timer.cancel();
+        MainActivity.this.timer.cancel();
         startActivity(intent);
     }
 
@@ -231,13 +237,12 @@ public class MainActivity extends AppCompatActivity {
      * When a RSS item is pressed launch a webView with the corresponding url
      */
     private class ItemClickListener implements ListView.OnItemClickListener {
-
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             String url = feedItems.get(position).getLink();
             Intent intent = new Intent(MainActivity.this, WebActivity.class);
             intent.putExtra("url", url);
-            timer.cancel();
+            MainActivity.this.timer.cancel();
             startActivity(intent);
         }
     }
